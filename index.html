@@ -1,112 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Pote préféré</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    background: #f5f0e6;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    color: #5a3e2b;
+}
+
+.container {
+    background: #e8dcc9;
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    position: relative;
+    max-width: 400px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 25px;
+}
+
+button {
+    padding: 12px 25px;
+    border-radius: 30px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+#yesBtn {
+    background: #8b5e3c;
+    color: white;
+}
+
+#noBtn {
+    background: #c9a77d;
+    color: #5a3e2b;
+}
+
+.loading {
+    width: 0;
+    height: 8px;
+    background: #8b5e3c;
+    margin: 20px auto;
+    border-radius: 5px;
+    display: none;
+}
+
+#vanne {
+    margin-top: 15px;
+    font-size: 14px;
+    opacity: 0.85;
+    min-height: 20px;
+}
+
+.confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    animation: fall 3s linear forwards;
+}
+
+@keyframes fall {
+    from {
+        transform: translateY(-10px) rotate(0deg);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Image gorille */
+#gorilla {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    width: 160px;
+    display: none;
+    z-index: 1000;
+    border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<img 
+    id="gorilla" 
+    src="https://media.tenor.com/5w5G5Rk9kWQAAAAC/gorilla-dance.gif" 
+    alt="gorille"
+/>
+
+<div class="container">
+    <h1 id="title">je suis ton pote préféré hein ?</h1>
+
+    <div class="buttons" id="buttons">
+        <button id="yesBtn">Oui</button>
+        <button id="noBtn">Non</button>
+    </div>
+
+    <div id="vanne"></div>
+    <div class="loading" id="loading"></div>
+</div>
+
 <script>
-const noBtn = document.getElementById("noBtn");
 const yesBtn = document.getElementById("yesBtn");
-const counter = document.getElementById("counter");
-const subtext = document.getElementById("subtext");
-const arrow = document.getElementById("arrow");
-const box = document.getElementById("box");
+const noBtn = document.getElementById("noBtn");
+const title = document.getElementById("title");
+const vanne = document.getElementById("vanne");
+const loading = document.getElementById("loading");
+const buttons = document.getElementById("buttons");
+const gorilla = document.getElementById("gorilla");
 
 let noCount = 0;
-let activated = false;
-let removedOnce = false;
-let yesScale = 1;
-let canFlee = true;
 
-const subtexts = [
-    "Sois honnête.",
-    "Tu hésites vraiment ?",
-    "On sait tous les deux.",
-    "C’est gênant là.",
-    "Tu perds ton temps.",
-    "Regarde le bouton Oui.",
-    "Accepte ton destin."
+const vannes = [
+    "Aïe… ça fait mal.",
+    "Réfléchis bien quand même.",
+    "Vraiment ? Après tout ce qu’on a vécu ?",
+    "C’est presque vexant là.",
+    "Je vais faire comme si j’avais rien vu.",
+    "Ok, je prends note. Très mal.",
+    "Dernière chance avant le malaise."
 ];
 
-const noTexts = [
-    "t’es sûr 🥺",
-    "nan mais vraiment ?",
-    "ok…",
-    "bon.",
-    "inutile.",
-    "😐"
-];
-
-function updateUI() {
-    counter.textContent = `Tentatives sur Non : ${noCount}`;
-    subtext.textContent = subtexts[Math.min(noCount, subtexts.length - 1)];
-}
-
-function growYes() {
-    yesScale += 0.12;
-    yesBtn.style.transform = `scale(${yesScale})`;
-    if (yesScale > 1.6) {
-        yesBtn.style.animation = "pulse 1s infinite";
-    }
-}
-
-noBtn.addEventListener("mouseenter", () => {
-    if (!activated) {
-        activated = true;
-        noBtn.style.position = "fixed";
-    }
-    fleeNo();
+noBtn.addEventListener("click", () => {
+    noCount++;
+    vanne.textContent = vannes[Math.min(noCount - 1, vannes.length - 1)];
 });
 
-noBtn.addEventListener("click", fleeNo);
-
-function fleeNo() {
-    if (!canFlee) return;
-    canFlee = false;
-
-    noCount++;
-    updateUI();
-    growYes();
-
-    if (navigator.vibrate) navigator.vibrate(60);
-
-    // Disparition UNE SEULE FOIS
-    if (noCount === 4 && !removedOnce) {
-        removedOnce = true;
-        noBtn.style.opacity = "0";
-        setTimeout(() => {
-            noBtn.style.opacity = "1";
-            noBtn.style.transform = "scale(0.8)";
-            noBtn.textContent = "…";
-        }, 600);
-    } else {
-        const maxX = window.innerWidth - noBtn.offsetWidth;
-        const maxY = window.innerHeight - noBtn.offsetHeight;
-
-        noBtn.style.left = Math.random() * maxX + "px";
-        noBtn.style.top = Math.random() * maxY + "px";
-
-        if (noCount <= noTexts.length) {
-            noBtn.textContent = noTexts[noCount - 1];
-        }
-    }
-
-    if (noCount === 3) arrow.style.display = "block";
-
-    // Cooldown anti-chaos
-    setTimeout(() => {
-        canFlee = true;
-    }, 300);
-}
-
-// Bouton OUI (inchangé et FIABLE)
 yesBtn.addEventListener("click", () => {
-    document.getElementById("buttons").style.display = "none";
-    document.getElementById("loading").style.display = "block";
-    document.getElementById("loading").style.width = "0";
+    buttons.style.display = "none";
+    vanne.textContent = "";
+    loading.style.display = "block";
+    loading.style.width = "0";
 
-    let p = 0;
-    const i = setInterval(() => {
-        p++;
-        document.getElementById("loading").style.width = p + "%";
-        if (p >= 100) {
-            clearInterval(i);
-            document.getElementById("loading").style.display = "none";
-            document.getElementById("title").textContent = "OUAIS ! Je le savais 🥳🥳";
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress++;
+        loading.style.width = progress + "%";
+        if (progress >= 100) {
+            clearInterval(interval);
+            loading.style.display = "none";
+            title.textContent = "OUAIS ! Je le savais 🥳🥳";
+            gorilla.style.display = "block";
             launchConfetti();
         }
     }, 30);
@@ -123,3 +177,6 @@ function launchConfetti() {
     }
 }
 </script>
+
+</body>
+</html>
