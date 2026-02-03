@@ -24,7 +24,7 @@ body {
     text-align: center;
     box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     position: relative;
-    max-width: 400px;
+    width: 420px;
 }
 
 .buttons {
@@ -32,6 +32,7 @@ body {
     justify-content: center;
     gap: 20px;
     margin-top: 25px;
+    position: relative;
 }
 
 button {
@@ -40,7 +41,8 @@ button {
     border: none;
     font-size: 16px;
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: transform 0.3s ease;
+    z-index: 1;
 }
 
 #yesBtn {
@@ -53,6 +55,13 @@ button {
     color: #5a3e2b;
 }
 
+#vanne {
+    margin-top: 15px;
+    font-size: 14px;
+    opacity: 0.85;
+    min-height: 22px;
+}
+
 .loading {
     width: 0;
     height: 8px;
@@ -62,13 +71,7 @@ button {
     display: none;
 }
 
-#vanne {
-    margin-top: 15px;
-    font-size: 14px;
-    opacity: 0.85;
-    min-height: 20px;
-}
-
+/* CONFETTIS */
 .confetti {
     position: fixed;
     width: 10px;
@@ -77,24 +80,18 @@ button {
 }
 
 @keyframes fall {
-    from {
-        transform: translateY(-10px) rotate(0deg);
-        opacity: 1;
-    }
-    to {
-        transform: translateY(100vh) rotate(360deg);
-        opacity: 0;
-    }
+    from { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+    to { transform: translateY(100vh) rotate(360deg); opacity: 0; }
 }
 
-/* Image gorille */
+/* GIF GORILLE */
 #gorilla {
     position: fixed;
     top: 15px;
     left: 15px;
-    width: 160px;
+    width: 180px;
     display: none;
-    z-index: 1000;
+    z-index: 9999;
     border-radius: 10px;
 }
 </style>
@@ -102,10 +99,10 @@ button {
 
 <body>
 
-<img 
-    id="gorilla" 
-    src="https://media.tenor.com/5w5G5Rk9kWQAAAAC/gorilla-dance.gif" 
-    alt="gorille"
+<img
+    id="gorilla"
+    src="https://media.tenor.com/4zK7pF1kWk0AAAAC/gorilla-dance.gif"
+    alt="gorille heureux"
 />
 
 <div class="container">
@@ -130,6 +127,7 @@ const buttons = document.getElementById("buttons");
 const gorilla = document.getElementById("gorilla");
 
 let noCount = 0;
+let yesScale = 1;
 
 const vannes = [
     "Aïe… ça fait mal.",
@@ -143,7 +141,20 @@ const vannes = [
 
 noBtn.addEventListener("click", () => {
     noCount++;
+
     vanne.textContent = vannes[Math.min(noCount - 1, vannes.length - 1)];
+
+    // Le bouton Oui grossit progressivement
+    yesScale += 0.15;
+    yesBtn.style.transform = `scale(${yesScale})`;
+
+    // À la dernière vanne : le Oui écrase le Non
+    if (noCount === vannes.length) {
+        yesBtn.style.zIndex = "10";
+        noBtn.style.zIndex = "1";
+        yesBtn.style.transform = "scale(2.4)";
+        vanne.textContent = "Dernière chance avant le malaise.";
+    }
 });
 
 yesBtn.addEventListener("click", () => {
