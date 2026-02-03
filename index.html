@@ -39,7 +39,7 @@ button {
     border: none;
     font-size: 16px;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 #yesBtn {
@@ -71,6 +71,12 @@ button {
     display: none;
 }
 
+#subtext {
+    font-size: 14px;
+    opacity: 0.75;
+    margin-top: 8px;
+}
+
 .confetti {
     position: fixed;
     width: 10px;
@@ -79,14 +85,14 @@ button {
 }
 
 @keyframes fall {
-    from {
-        transform: translateY(-10px) rotate(0deg);
-        opacity: 1;
-    }
-    to {
-        transform: translateY(100vh) rotate(360deg);
-        opacity: 0;
-    }
+    from { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+    to { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
 }
 </style>
 </head>
@@ -95,9 +101,8 @@ button {
 
 <div class="container" id="box">
     <h1 id="title">je suis ton pote préféré hein ?</h1>
-    <p id="counter" style="margin-top:10px;font-size:14px;opacity:0.7;">
-        Tentatives sur Non : 0
-    </p>
+    <p id="subtext">Sois honnête.</p>
+    <p id="counter" style="font-size:14px;opacity:0.7;">Tentatives sur Non : 0</p>
 
     <div class="arrow" id="arrow">⬇️</div>
 
@@ -112,51 +117,58 @@ button {
 <script>
 const noBtn = document.getElementById("noBtn");
 const yesBtn = document.getElementById("yesBtn");
-const title = document.getElementById("title");
-const loading = document.getElementById("loading");
-const arrow = document.getElementById("arrow");
-const buttons = document.getElementById("buttons");
-const box = document.getElementById("box");
 const counter = document.getElementById("counter");
+const subtext = document.getElementById("subtext");
+const arrow = document.getElementById("arrow");
+const box = document.getElementById("box");
 
 let noCount = 0;
 let activated = false;
-let almostClicked = false;
-let fleeTimeout = null;
+let removedOnce = false;
 let yesScale = 1;
 
-const noTexts = [
-    "t’es sûr 🥺 ?",
-    "nan tu t’es trompé hein ?",
-    "réfléchis encore 😐",
-    "le bouton oui est juste là",
-    "ok là tu forces",
+const subtexts = [
+    "Sois honnête.",
+    "Tu hésites vraiment ?",
+    "On sait tous les deux.",
+    "C’est gênant là.",
+    "Tu perds ton temps.",
+    "Regarde le bouton Oui.",
+    "Accepte ton destin."
 ];
 
-function updateCounter() {
+const noTexts = [
+    "t’es sûr 🥺",
+    "nan mais vraiment ?",
+    "ok…",
+    "bon.",
+    "inutile.",
+    "😐"
+];
+
+function updateUI() {
     counter.textContent = `Tentatives sur Non : ${noCount}`;
+    subtext.textContent = subtexts[Math.min(noCount, subtexts.length - 1)];
 }
 
-function growYesButton() {
+function growYes() {
     yesScale += 0.12;
     yesBtn.style.transform = `scale(${yesScale})`;
+    if (yesScale > 1.6) {
+        yesBtn.style.animation = "pulse 1s infinite";
+    }
 }
 
 document.addEventListener("mousemove", (e) => {
     if (!activated) return;
 
     const rect = noBtn.getBoundingClientRect();
-    const distance = Math.hypot(
+    const d = Math.hypot(
         e.clientX - (rect.left + rect.width / 2),
         e.clientY - (rect.top + rect.height / 2)
     );
 
-    if (distance < 120 && !fleeTimeout) {
-        fleeTimeout = setTimeout(() => {
-            fleeNo();
-            fleeTimeout = null;
-        }, 300);
-    }
+    if (d < 120) fleeNo();
 });
 
 noBtn.addEventListener("mouseenter", () => {
@@ -164,83 +176,17 @@ noBtn.addEventListener("mouseenter", () => {
         activated = true;
         noBtn.style.position = "fixed";
     }
-
-    if (!almostClicked) {
-        almostClicked = true;
-        return;
-    }
-
-    fleeTimeout = setTimeout(() => {
-        fleeNo();
-        fleeTimeout = null;
-    }, 300);
 });
 
 noBtn.addEventListener("click", fleeNo);
 
 function fleeNo() {
     noCount++;
-    updateCounter();
-    growYesButton();
+    updateUI();
+    growYes();
 
-    if (navigator.vibrate) navigator.vibrate(80);
+    if (navigator.vibrate) navigator.vibrate(60);
 
-    const maxX = window.innerWidth - noBtn.offsetWidth;
-    const maxY = window.innerHeight - noBtn.offsetHeight;
-
-    noBtn.style.left = Math.random() * maxX + "px";
-    noBtn.style.top = Math.random() * maxY + "px";
-
-    if (noCount <= noTexts.length) {
-        noBtn.textContent = noTexts[noCount - 1];
-    }
-
-    if (noCount === 4) {
-        arrow.style.display = "block";
-    }
-
-    if (noCount >= 6) {
-        noBtn.remove();
-        arrow.style.display = "none";
-
-        const p = document.createElement("p");
-        p.textContent = "voilà t’as plus le choix enfaite !";
-        p.style.marginTop = "15px";
-        box.appendChild(p);
-    }
-}
-
-yesBtn.addEventListener("click", () => {
-    buttons.style.display = "none";
-    loading.style.display = "block";
-    loading.style.width = "0";
-
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress++;
-        loading.style.width = progress + "%";
-        if (progress >= 100) {
-            clearInterval(interval);
-            loading.style.display = "none";
-            title.textContent = "OUAIS ! Je le savais 🥳🥳";
-            launchConfetti();
-        }
-    }, 30);
-});
-
-function launchConfetti() {
-    for (let i = 0; i < 90; i++) {
-        const confetti = document.createElement("div");
-        confetti.classList.add("confetti");
-        confetti.style.left = Math.random() * window.innerWidth + "px";
-        confetti.style.background = `hsl(${Math.random()*360},80%,60%)`;
-        confetti.style.animationDuration = 2 + Math.random() * 2 + "s";
-        document.body.appendChild(confetti);
-
-        setTimeout(() => confetti.remove(), 4000);
-    }
-}
-</script>
-
-</body>
-</html>
+    // DISPARITION UNE SEULE FOIS
+    if (noCount === 4 && !removedOnce) {
+        removedOnce = true;
