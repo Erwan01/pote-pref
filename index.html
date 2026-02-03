@@ -99,8 +99,8 @@ button {
 
 <img
     id="gorilla"
-    src="cc278a18-d096-4a54-852b-f525b0728083.jpeg"
-    alt="gorille-drole-tapis-de-souris"
+    src="gorille-drole-tapis-de-souris.jpg"
+    alt="gorille troll"
 />
 
 <div class="container">
@@ -124,7 +124,8 @@ const buttons = document.getElementById("buttons");
 const title = document.getElementById("title");
 const gorilla = document.getElementById("gorilla");
 
-let noCount = 0;
+let noCount = 0;          // compteur invisible
+const MAX_NO_CLICKS = 20;
 
 const vannes = [
     "Aïe… ça pique.",
@@ -133,16 +134,37 @@ const vannes = [
     "C’est un peu gênant maintenant.",
     "Tu fais exprès.",
     "Je note. Très mal.",
-    "Ok stop. Clique sur Oui."
+    "On approche de la fin…",
+    "Toujours pas fatigué ?",
+    "C’est presque impressionnant.",
+    "Ok, respect.",
+    "Vraiment 10 fois ?",
+    "Tu testes ma patience.",
+    "Je commence à juger.",
+    "Ça devient personnel.",
+    "Encore ?",
+    "Toujours pas ?",
+    "Bon…",
+    "Sérieux.",
+    "Derniers instants.",
+    "Ok c’est fini pour toi."
 ];
 
-// Position initiale du bouton Non (à côté du Oui)
+// position initiale correcte
 resetNoPosition();
 
 noBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     noCount++;
+
     vanne.textContent = vannes[Math.min(noCount - 1, vannes.length - 1)];
+
+    if (noCount >= MAX_NO_CLICKS) {
+        noBtn.style.display = "none";
+        vanne.textContent = "Bon. Le bouton Non a abandonné.";
+        return;
+    }
+
     moveNoRandomly();
 });
 
@@ -159,11 +181,8 @@ function moveNoRandomly() {
     const maxX = window.innerWidth - noBtn.offsetWidth - padding;
     const maxY = window.innerHeight - noBtn.offsetHeight - padding;
 
-    const x = Math.random() * maxX;
-    const y = Math.random() * maxY;
-
-    noBtn.style.left = x + "px";
-    noBtn.style.top = y + "px";
+    noBtn.style.left = Math.random() * maxX + "px";
+    noBtn.style.top = Math.random() * maxY + "px";
 }
 
 yesBtn.addEventListener("click", () => {
@@ -200,4 +219,3 @@ function launchConfetti() {
 
 </body>
 </html>
-
